@@ -1,30 +1,59 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view/>
+  <div>
+    <div v-if="!isMobileView" class="app flex flex-column">
+      <Navigation />
+      <div class="app-content flex flex-column">
+        <InvoiceModal />
+        <router-view />
+      </div>
+    </div>
+
+    <div v-else class="mobile-message flex flex-column">
+      <h2>Sorry, this app is not supported on mobile devices</h2>
+      <p>To use this app, please use a computer or Tablet</p>
+    </div>
+  </div>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script>
+/* CUSTOM COMPONENT */
+import Navigation from '@/components/Navigation.vue';
+import InvoiceModal from './components/InvoiceModal.vue';
 
-nav {
-  padding: 30px;
-}
+import { ref } from '@vue/reactivity';
+import { onMounted } from '@vue/runtime-core';
+export default {
+  components: {
+    Navigation,
+    InvoiceModal
+  },
 
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
+  setup() {
+    const isMobileView = ref(null);
 
-nav a.router-link-exact-active {
-  color: #42b983;
-}
+    onMounted(() => {
+      checkScreenSize();
+      window.addEventListener('resize', checkScreenSize);
+    });
+
+    const checkScreenSize = () => {
+      const windowWidth = window.innerWidth;
+      if (windowWidth <= 750) {
+        isMobileView.value = true;
+        return;
+      }
+
+      isMobileView.value = false;
+    };
+
+    return {
+      checkScreenSize,
+      isMobileView,
+    };
+  },
+};
+</script>
+
+<style lang="scss">
+@import './assets/scss/app.scss';
 </style>
