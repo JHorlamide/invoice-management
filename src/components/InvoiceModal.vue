@@ -12,6 +12,7 @@
         <h4>Bill From</h4>
         <div class="input flex flex-column">
           <BaseInput
+            class="input"
             type="text"
             :id="billerStreetAddress"
             label="Street Address"
@@ -22,9 +23,10 @@
         </div>
 
         <!-- LOCATION DETAIL -->
-        <div class="location-detail flex">
+        <div class="location-details flex">
           <div class="input flex flex-column">
             <BaseInput
+              class="input"
               type="text"
               :id="billerCity"
               label="City"
@@ -36,6 +38,7 @@
 
           <div class="input flex flex-column">
             <BaseInput
+              class="input"
               type="text"
               :id="billerZipCode"
               label="Zip Code"
@@ -47,6 +50,7 @@
 
           <div class="input flex flex-column">
             <BaseInput
+              class="input"
               type="text"
               :id="billerCountry"
               label="Country"
@@ -61,8 +65,10 @@
       <!-- BILL TO -->
       <div class="bill-to flex flex-column">
         <h4>Bill To</h4>
+
         <div class="input flex flex-column">
           <BaseInput
+            class="input"
             type="text"
             :id="clientName"
             label="Client's Name"
@@ -74,6 +80,7 @@
 
         <div class="input flex flex-column">
           <BaseInput
+            class="input"
             type="text"
             :id="clientEmail"
             label="Client's Email"
@@ -85,6 +92,7 @@
 
         <div class="input flex flex-column">
           <BaseInput
+            class="input"
             type="text"
             :id="clientStreetAddress"
             label="Client's Street Address"
@@ -95,9 +103,10 @@
         </div>
 
         <!-- LOCATION DETAIL -->
-        <div class="location-detail flex">
+        <div class="location-details flex">
           <div class="input flex flex-column">
             <BaseInput
+              class="input"
               type="text"
               :id="clientCity"
               label="Client's City"
@@ -109,6 +118,7 @@
 
           <div class="input flex flex-column">
             <BaseInput
+              class="input"
               type="text"
               :id="clientZipCode"
               label="Client's Zip Code"
@@ -120,6 +130,7 @@
 
           <div class="input flex flex-column">
             <BaseInput
+              class="input"
               type="text"
               :id="clientCountry"
               label="Client's Country"
@@ -133,14 +144,15 @@
 
       <!-- INVOICE WORK DETAILS -->
       <div class="invoice-work flex flex-column">
-        <!-- -- PAYMENT -- -->
         <div class="payment flex">
           <div class="input flex flex-column">
             <BaseInput
+              class="input"
               type="text"
               :id="invoiceDate"
               label="Invoice Date"
               v-model="invoiceDate"
+              :value="invoiceDate"
               :labelFor="invoiceDate"
               disabled
             />
@@ -148,9 +160,11 @@
 
           <div class="input flex flex-column">
             <BaseInput
+              class="input"
               type="text"
               :id="paymentDueDate"
               label="Payment Due Date"
+              :value="paymentDueDate"
               v-model="paymentDueDate"
               :labelFor="paymentDueDate"
               disabled
@@ -158,19 +172,22 @@
           </div>
         </div>
 
-        <!-- -- PAYMENT TERMS -- -->
         <div class="input flex flex-column">
           <BaseSelect
-            :labelForm="paymentTerms"
+            class="input"
+            :labelFor="paymentTerms"
             label="Payment Terms"
             :id="paymentTerms"
             v-model="paymentTerms"
-            :options="paymentTermsOptions"
-          />
+            :options="paymentOptions"
+          >
+            <option value="" selected>e.g Next 10 days</option>
+          </BaseSelect>
         </div>
 
         <div class="input flex flex-column">
           <BaseInput
+            class="input"
             type="text"
             :id="productDescription"
             label="Product Description"
@@ -180,59 +197,88 @@
           />
         </div>
 
-        <!-- --- WORK ITEMS --- -->
+        <!-- WORK ITEMS -->
         <div class="work-items">
           <h3>Item List</h3>
+
           <table class="item-list">
+            <!-- TABLE HEADING -->
             <tr class="table-heading">
               <th class="item-name">Item Name</th>
               <th class="qty">Quantity</th>
               <th class="price">Price</th>
               <th class="total">Total</th>
             </tr>
+
+            <!-- TABLE DATA -->
             <tr
               class="table-items"
-              v-for="(item, index) in invoiceItemList"
+              v-for="(
+                { itemName, qty, price, total, id }, index
+              ) in invoiceItemList"
               :key="index"
             >
               <td class="item-name">
                 <BaseInput
+                  class="input"
                   type="text"
                   label="Item Name"
-                  :labelFor="item.itemName"
-                  :v-model="item.itemName"
+                  :labelFor="itemName"
+                  :v-model="itemName"
                 />
               </td>
+
               <td class="qty">
                 <BaseInput
+                  class="input"
                   type="number"
                   label="Item Quantity"
-                  :labelFor="item.qty"
-                  :v-model="item.qty"
+                  :labelFor="qty"
+                  :v-model="qty"
                 />
               </td>
+
               <td class="price">
                 <BaseInput
+                  class="input"
                   type="text"
                   label="Item Price"
-                  :labelFor="item.price"
-                  :v-model="item.price"
+                  :labelFor="price"
+                  :v-model="price"
                 />
               </td>
-              <td class="total flex">
-                ${{ (item.total = item.qty * item.price) }}
-              </td>
+
+              <td class="total flex">₦{{ (total = qty * price) }}</td>
+
+              <img
+                @click="deleteInvoiceItem(id)"
+                src="@/assets/images/icon-delete.svg"
+                alt="delete-icon"
+              />
             </tr>
-            <img
-              @click="deleteInvoiceItem(item.id)"
-              src="@/assets/images/icon-delete.svg"
-              alt="delete-icon"
-            />
           </table>
+
           <div @click="addNewInvoiceItem" class="flex button">
             <img src="@/assets/images/icon-plus.svg " alt="add-item-icon" />
             Add New Item
           </div>
+        </div>
+      </div>
+
+      <!-- SAVE/EXIT BUTTON -->
+      <div class="save flex">
+        <div class="left">
+          <BaseButton @click="cancelInvoice" class="red">Cancel</BaseButton>
+        </div>
+
+        <div class="right flex">
+          <BaseButton @click="saveDraft" class="dark-purple">
+            Save Draft
+          </BaseButton>
+
+          <BaseButton @click="publishInvoice" class="purple">
+            Create Invoice
+          </BaseButton>
         </div>
       </div>
     </form>
@@ -240,53 +286,109 @@
 </template>
 
 <script>
-import { reactive, ref, toRefs } from '@vue/reactivity';
-import BaseInput from './CustomComponents/BaseInput.vue';
-import BaseSelect from './CustomComponents/BaseSelect.vue';
+import { useStore } from "vuex";
+import { reactive, ref, toRefs } from "@vue/reactivity";
+import BaseInput from "./CustomComponents/BaseInput.vue";
+import BaseSelect from "./CustomComponents/BaseSelect.vue";
+import BaseButton from "./CustomComponents/BaseButton.vue";
+import { watch } from "@vue/runtime-core";
 // import uid from 'uid'
 
 export default {
-  name: 'InvoiceModal',
+  name: "InvoiceModal",
   components: {
     BaseInput,
     BaseSelect,
+    BaseButton,
   },
-  set() {
-    const paymentTermsOptions = ref({
-      thirtyDays: 'Next 30 Days',
-      sixtyDays: 'Next 60 Days',
+  setup() {
+    const store = useStore();
+    const paymentDueDateUnix = ref("");
+    const loading = ref("");
+    const docId = ref("");
+    const invoiceDraft = ref("");
+    const invoicePending = ref("");
+    const invoiceTotal = ref(0);
+    const paymentTerms = ref("20");
+    const invoiceItemList = ref([]);
+    const invoiceDateUnix = ref(new Date());
+    const paymentOptions = reactive({
+      thirtyDays: "Next 30 Days",
+      sixtyDays: "Next 60 Days",
     });
 
-    const invoiceItemList = ref([]);
+    const dateOptions = reactive({
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+    const dateFormat = ref(
+      new Date(invoiceDateUnix.value).toLocaleDateString("en-us", {
+        ...dateOptions,
+      })
+    );
+    const invoiceDate = ref(dateFormat.value);
 
     const formData = reactive({
-      dateOptions: { year: 'numeric', month: 'short', day: 'numeric' },
-      docId: null,
-      loading: null,
-      billerStreetAddress: null,
-      billerCity: null,
-      billerZipCode: null,
-      billerCountry: null,
-      clientName: null,
-      clientEmail: null,
-      clientStreetAddress: null,
-      clientCity: null,
-      clientZipCode: null,
-      clientCountry: null,
-      invoiceDateUnix: null,
-      invoiceDate: null,
-      paymentTerms: null,
-      paymentDueDateUnix: null,
-      paymentDueDate: null,
-      productDescription: null,
-      invoicePending: null,
-      invoiceDraft: null,
-      invoiceTotal: 0,
+      billerStreetAddress: "",
+      billerCity: "",
+      billerZipCode: "",
+      billerCountry: "",
+      clientName: "",
+      clientEmail: "",
+      clientStreetAddress: "",
+      clientCity: "",
+      clientZipCode: "",
+      clientCountry: "",
+      paymentDueDate: "",
+      productDescription: "",
     });
 
+    function cancelInvoice() {
+      store.commit("toggleInvoiceModal");
+    }
+
+    function saveDraft() {}
+
+    function publishInvoice() {}
+
+    watch(paymentTerms, (newVal, oldVal) => {
+      console.log(newVal, oldVal);
+    });
+
+    // watch(
+    //   () => formData.paymentTerms,
+    //   (paymentTerms) => {
+    //     const futureDate = new Date();
+
+    //     paymentDueDateUnix.value = futureDate.setDate(
+    //       futureDate.getDate() + parseInt(paymentTerms)
+    //     );
+
+    //     formData.paymentDueDate = new Date(
+    //       paymentDueDateUnix
+    //     ).toLocaleDateString("en-us", {
+    //       ...dateOptions,
+    //     });
+    //   },
+    //   { deep: true }
+    // );
+
     return {
-      paymentTermsOptions,
+      docId,
+      loading,
+      saveDraft,
+      invoiceDraft,
       invoiceItemList,
+      cancelInvoice,
+      invoiceDateUnix,
+      invoiceDate,
+      paymentTerms,
+      invoicePending,
+      paymentOptions,
+      invoiceTotal,
+      publishInvoice,
+      paymentDueDateUnix,
       ...toRefs(formData),
     };
   },

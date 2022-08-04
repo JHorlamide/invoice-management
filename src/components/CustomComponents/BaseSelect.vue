@@ -1,12 +1,9 @@
 <template>
   <div>
-    <label :for="labelForm">{{ label }}</label>
+    <label :for="labelFor">{{ label }}</label>
     <select v-bind="$attrs" :value="value" @input="update" required>
-      <option
-        v-for="(value, key, index) in options"
-        :key="index"
-        :value="value"
-      >
+      <slot />
+      <option v-for="(value, key, index) in options" :key="index">
         {{ value }}
       </option>
     </select>
@@ -15,17 +12,18 @@
 
 <script>
 export default {
-  name: 'BaseSelect',
+  name: "BaseSelect",
   inheritAttrs: false,
   props: {
     label: String,
-    labelForm: String,
+    labelFor: String,
     options: [Object, Array],
     value: String,
   },
+
   setup(props, { emit }) {
     function update(e) {
-      emit('input', e.target.value);
+      emit("input", e.target.value);
     }
 
     return {

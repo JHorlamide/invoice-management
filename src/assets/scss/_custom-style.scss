@@ -10,7 +10,28 @@ button,
 }
 
 input {
-    padding: 15px;
-    border: 1px solid;
+    margin-bottom: 24px;
+}
+
+label {
+    font-size: 12px;
+    margin-bottom: 6px;
+}
+
+select {
+    margin-bottom: 20px;
+}
+
+input,
+select {
+    width: 100%;
+    color: #fff;
+    background-color: #1e2139;
     border-radius: 5px;
+    padding: 12px 4px;
+    border: 1px solid #1e2139;
+
+    &:focus {
+        outline: none;
+    }
 }

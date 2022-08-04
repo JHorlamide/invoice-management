@@ -3,7 +3,10 @@
     <div v-if="!isMobileView" class="app flex flex-column">
       <Navigation />
       <div class="app-content flex flex-column">
-        <InvoiceModal />
+        <transition name="invoice">
+          <InvoiceModal v-if="showInvoiceModal" />
+        </transition>
+
         <router-view />
       </div>
     </div>
@@ -17,23 +20,28 @@
 
 <script>
 /* CUSTOM COMPONENT */
-import Navigation from '@/components/Navigation.vue';
-import InvoiceModal from './components/InvoiceModal.vue';
+import Navigation from "@/components/Navigation.vue";
+import InvoiceModal from "./components/InvoiceModal.vue";
 
-import { ref } from '@vue/reactivity';
-import { onMounted } from '@vue/runtime-core';
+import { useStore } from "vuex";
+import { ref, computed } from "vue";
+import { onMounted } from "@vue/runtime-core";
 export default {
   components: {
     Navigation,
-    InvoiceModal
+    InvoiceModal,
   },
 
   setup() {
     const isMobileView = ref(null);
+    const store = useStore();
+
+    const welcomeMessage = computed(() => store.state.message);
+    const showInvoiceModal = computed(() => store.state.invoiceModal);
 
     onMounted(() => {
       checkScreenSize();
-      window.addEventListener('resize', checkScreenSize);
+      window.addEventListener("resize", checkScreenSize);
     });
 
     const checkScreenSize = () => {
@@ -49,11 +57,13 @@ export default {
     return {
       checkScreenSize,
       isMobileView,
+      showInvoiceModal,
+      welcomeMessage,
     };
   },
 };
 </script>
 
 <style lang="scss">
-@import './assets/scss/app.scss';
+@import "./assets/scss/app.scss";
 </style>
