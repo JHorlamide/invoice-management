@@ -10,11 +10,11 @@
       <!-- BILL FROM -->
       <div class="bill-from flex flex-column">
         <h4>Bill From</h4>
+
         <div class="input flex flex-column">
           <BaseInput
             class="input"
             type="text"
-            :id="billerStreetAddress"
             label="Street Address"
             v-model="billerStreetAddress"
             :labelFor="billerStreetAddress"
@@ -28,7 +28,6 @@
             <BaseInput
               class="input"
               type="text"
-              :id="billerCity"
               label="City"
               v-model="billerCity"
               :labelFor="billerCity"
@@ -40,7 +39,6 @@
             <BaseInput
               class="input"
               type="text"
-              :id="billerZipCode"
               label="Zip Code"
               v-model="billerZipCode"
               :labelFor="billerZipCode"
@@ -52,7 +50,6 @@
             <BaseInput
               class="input"
               type="text"
-              :id="billerCountry"
               label="Country"
               v-model="billerCountry"
               :labelFor="billerCountry"
@@ -70,7 +67,6 @@
           <BaseInput
             class="input"
             type="text"
-            :id="clientName"
             label="Client's Name"
             v-model="clientName"
             :labelFor="clientName"
@@ -82,7 +78,6 @@
           <BaseInput
             class="input"
             type="text"
-            :id="clientEmail"
             label="Client's Email"
             v-model="clientEmail"
             :labelFor="clientEmail"
@@ -94,10 +89,9 @@
           <BaseInput
             class="input"
             type="text"
-            :id="clientStreetAddress"
+            :labelFor="clientStreetAddress"
             label="Client's Street Address"
             v-model="clientStreetAddress"
-            :labelFor="clientStreetAddress"
             required
           />
         </div>
@@ -108,7 +102,6 @@
             <BaseInput
               class="input"
               type="text"
-              :id="clientCity"
               label="Client's City"
               v-model="clientCity"
               :labelFor="clientCity"
@@ -120,7 +113,6 @@
             <BaseInput
               class="input"
               type="text"
-              :id="clientZipCode"
               label="Client's Zip Code"
               v-model="clientZipCode"
               :labelFor="clientZipCode"
@@ -132,7 +124,6 @@
             <BaseInput
               class="input"
               type="text"
-              :id="clientCountry"
               label="Client's Country"
               v-model="clientCountry"
               :labelFor="clientCountry"
@@ -149,7 +140,6 @@
             <BaseInput
               class="input"
               type="text"
-              :id="invoiceDate"
               label="Invoice Date"
               v-model="invoiceDate"
               :value="invoiceDate"
@@ -162,7 +152,6 @@
             <BaseInput
               class="input"
               type="text"
-              :id="paymentDueDate"
               label="Payment Due Date"
               :value="paymentDueDate"
               v-model="paymentDueDate"
@@ -177,7 +166,6 @@
             class="input"
             :labelFor="paymentTerms"
             label="Payment Terms"
-            :id="paymentTerms"
             v-model="paymentTerms"
             :options="paymentOptions"
           >
@@ -189,7 +177,6 @@
           <BaseInput
             class="input"
             type="text"
-            :id="productDescription"
             label="Product Description"
             v-model="productDescription"
             :labelFor="productDescription"
@@ -287,12 +274,11 @@
 
 <script>
 import { useStore } from "vuex";
-import { reactive, ref, toRefs } from "@vue/reactivity";
+import { reactive, ref, toRefs, watch, onMounted } from "vue";
 import BaseInput from "./CustomComponents/BaseInput.vue";
 import BaseSelect from "./CustomComponents/BaseSelect.vue";
 import BaseButton from "./CustomComponents/BaseButton.vue";
-import { watch } from "@vue/runtime-core";
-// import uid from 'uid'
+import { useHandleInvoice } from "@/composables/useHandleInvoice";
 
 export default {
   name: "InvoiceModal",
@@ -301,34 +287,8 @@ export default {
     BaseSelect,
     BaseButton,
   },
+  
   setup() {
-    const store = useStore();
-    const paymentDueDateUnix = ref("");
-    const loading = ref("");
-    const docId = ref("");
-    const invoiceDraft = ref("");
-    const invoicePending = ref("");
-    const invoiceTotal = ref(0);
-    const paymentTerms = ref("20");
-    const invoiceItemList = ref([]);
-    const invoiceDateUnix = ref(new Date());
-    const paymentOptions = reactive({
-      thirtyDays: "Next 30 Days",
-      sixtyDays: "Next 60 Days",
-    });
-
-    const dateOptions = reactive({
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-    const dateFormat = ref(
-      new Date(invoiceDateUnix.value).toLocaleDateString("en-us", {
-        ...dateOptions,
-      })
-    );
-    const invoiceDate = ref(dateFormat.value);
-
     const formData = reactive({
       billerStreetAddress: "",
       billerCity: "",
@@ -341,8 +301,60 @@ export default {
       clientZipCode: "",
       clientCountry: "",
       paymentDueDate: "",
+      paymentTerms: "",
       productDescription: "",
     });
+    const store = useStore();
+    const paymentDueDateUnix = ref("");
+    const loading = ref("");
+    const docId = ref("");
+    const invoiceDraft = ref("");
+    const invoicePending = ref("");
+    const invoiceTotal = ref(0);
+    const invoiceItemList = ref([]);
+    const invoiceDateUnix = ref(new Date());
+    const invoiceDate = ref("");
+    const paymentOptions = reactive({
+      "Next 30 days": "30",
+      "Next 60 days": "60",
+    });
+    const dateOptions = reactive({
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+
+    const { createInvoice } = useHandleInvoice(formData);
+
+    onMounted(() => {
+      // GET CURRENT DATE FOR INVOICE DATE FIELD
+      invoiceDateUnix.value = new Date();
+      invoiceDate.value = new Date(invoiceDateUnix.value).toLocaleDateString(
+        "en-us",
+        { ...dateOptions }
+      );
+    });
+
+    watch(
+      () => formData.paymentTerms,
+      (currentPaymentTerms) => {
+        const futureDate = new Date();
+
+        paymentDueDateUnix.value = futureDate.setDate(
+          futureDate.getDate() + parseInt(currentPaymentTerms)
+        );
+
+        formData.paymentDueDate = new Date(
+          paymentDueDateUnix.value
+        ).toLocaleDateString("en-us", {
+          ...dateOptions,
+        });
+      }
+    );
+
+    function submitInvoice() {
+      createInvoice();
+    }
 
     function cancelInvoice() {
       store.commit("toggleInvoiceModal");
@@ -352,26 +364,12 @@ export default {
 
     function publishInvoice() {}
 
-    watch(paymentTerms, (newVal, oldVal) => {
-      console.log(newVal, oldVal);
-    });
-
     // watch(
     //   () => formData.paymentTerms,
-    //   (paymentTerms) => {
-    //     const futureDate = new Date();
-
-    //     paymentDueDateUnix.value = futureDate.setDate(
-    //       futureDate.getDate() + parseInt(paymentTerms)
-    //     );
-
-    //     formData.paymentDueDate = new Date(
-    //       paymentDueDateUnix
-    //     ).toLocaleDateString("en-us", {
-    //       ...dateOptions,
-    //     });
-    //   },
-    //   { deep: true }
+    //   (currentValue, oldValue) => {
+    //     console.log("CURRENT VALUE: ", currentValue);
+    //     console.log("OLD VALUE: ", oldValue);
+    //   }
     // );
 
     return {
@@ -380,10 +378,10 @@ export default {
       saveDraft,
       invoiceDraft,
       invoiceItemList,
-      cancelInvoice,
+      submitInvoice,
       invoiceDateUnix,
       invoiceDate,
-      paymentTerms,
+      cancelInvoice,
       invoicePending,
       paymentOptions,
       invoiceTotal,

@@ -1,10 +1,18 @@
 <template>
   <div>
     <label :for="labelFor">{{ label }}</label>
-    <select v-bind="$attrs" :value="value" @input="update" required>
+    <select
+      v-bind="$attrs"
+      :value="modelValue"
+      @input="$emit('update:modelValue', $event.target.value)"
+    >
       <slot />
-      <option v-for="(value, key, index) in options" :key="index">
-        {{ value }}
+      <option
+        v-for="(value, key, index) in options"
+        :key="index"
+        :value="value"
+      >
+        {{ key }}
       </option>
     </select>
   </div>
@@ -18,19 +26,7 @@ export default {
     label: String,
     labelFor: String,
     options: [Object, Array],
-    value: String,
-  },
-
-  setup(props, { emit }) {
-    function update(e) {
-      emit("input", e.target.value);
-    }
-
-    return {
-      update,
-    };
+    modelValue: String,
   },
 };
 </script>
-
-<style lang="scss" scoped></style>

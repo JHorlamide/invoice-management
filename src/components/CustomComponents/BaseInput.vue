@@ -1,26 +1,20 @@
 <template>
   <label :for="labelFor">{{ label }}</label>
-  <input v-bind="$attrs" :value="value" @input="updateValue" />
+  <input
+    v-bind="$attrs"
+    :value="modelValue"
+    @input="$emit('update:modelValue', $event.target.value)"
+  />
 </template>
 
 <script>
 export default {
   name: "InvoiceModal",
-  inheritAttrs: false,
+  // inheritAttrs: false,
   props: {
-    value: [String, Number],
+    modelValue: [String, Number],
     label: String,
     labelFor: String,
-  },
-
-  setup(props, { emit }) {
-    function updateValue(e) {
-      emit("input", e.target.value);
-    }
-
-    return {
-      updateValue,
-    };
   },
 };
 </script>
